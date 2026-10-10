@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ТехноМаркет — демо чата ИИ-агента</title>
+  <link rel="stylesheet" href="styles/demo.css" />
+  <link rel="stylesheet" href="styles/chat-widget.css" />
+</head>
+<body>
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="logo" href="#top">
+        <span class="logo-mark">TM</span>
+        <span class="logo-text">Техно<b>Маркет</b></span>
+      </a>
+      <nav class="site-nav" id="site-nav"></nav>
+      <div class="header-actions">
+        <span class="header-phone">8 800 555-35-35</span>
+        <button class="btn btn-primary" id="open-chat-top" type="button">Чат с ИИ</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <div class="hero-text">
+        <span class="pill">ИИ-ассистент отвечает за 45 секунд</span>
+        <h1>Магазин техники, где поддержка всегда на связи</h1>
+        <p class="hero-lead">
+          Оформите заказ, отследите доставку или оформите возврат прямо в чате.
+          Нейра — наш ИИ-ассистент — помогает круглосуточно и подключает живого оператора, если нужно.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" id="open-chat-hero" type="button">Открыть чат</button>
+          <a class="btn btn-ghost btn-lg" href="#catalog">Смотреть каталог</a>
+        </div>
+        <ul class="hero-points">
+          <li>✅ Демо-виджет в правом нижнем углу</li>
+          <li>✅ Мок-данные и мок-ответы ассистента</li>
+          <li>✅ Без сборки — чистый HTML/CSS/JS</li>
+        </ul>
+      </div>
+      <div class="hero-card" aria-hidden="true">
+        <div class="hero-chat-preview">
+          <div class="hcp-header">
+            <span class="hcp-avatar">Н</span>
+            <div>
+              <strong>Нейра · ИИ-ассистент</strong>
+              <span>Онлайн</span>
+            </div>
+          </div>
+          <div class="hcp-msg hcp-msg--agent">Здравствуйте! Чем помочь? 👋</div>
+          <div class="hcp-msg hcp-msg--user">Где мой заказ №482913?</div>
+          <div class="hcp-msg hcp-msg--agent">Он уже у курьера — приедет сегодня до 19:00 🚚</div>
+          <div class="hcp-typing"><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats container" id="stats"></section>
+
+    <section class="features container" id="features"></section>
+
+    <section class="catalog container" id="catalog">
+      <div class="section-head">
+        <h2>Хиты каталога</h2>
+        <p>Спросите ассистента про любой товар — он подскажет цену и наличие.</p>
+      </div>
+      <div class="product-grid" id="product-grid"></div>
+    </section>
+
+    <section class="support container" id="support">
+      <div class="support-inner">
+        <div>
+          <h2>Поддержка, которая не заставляет ждать</h2>
+          <p>
+            ИИ-ассистент мгновенно отвечает на типовые вопросы: доставка, возврат, оплата, гарантия.
+            Сложные случаи он передаёт живому оператору вместе с историей диалога.
+          </p>
+        </div>
+        <button class="btn btn-primary btn-lg" id="open-chat-support" type="button">Задать вопрос ассистенту</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>ТехноМаркет</strong> — демонстрационный проект чата ИИ-агента.
+      </div>
+      <div class="footer-note">Мок-данные находятся в <code>src/mock/mockChat.js</code></div>
+    </div>
+  </footer>
+
+  <!-- Порядок подключения: сначала мок-данные, затем виджет, затем инициализация. -->
+  <script src="src/mock/mockChat.js"></script>
+  <script src="src/chatWidget.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

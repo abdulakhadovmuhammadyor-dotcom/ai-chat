@@ -1,0 +1,617 @@
+/* Стили плавающего чат-виджета ИИ-агента (в стиле Jivo). */
+
+.aiw-root {
+  --aiw-brand: #10b981;
+  --aiw-brand-dark: #059669;
+  --aiw-brand-soft: #ecfdf5;
+  --aiw-ink: #0f172a;
+  --aiw-muted: #64748b;
+  --aiw-line: #e2e8f0;
+  --aiw-bg: #ffffff;
+  --aiw-bg-soft: #f1f5f9;
+  --aiw-agent-bubble: #f1f5f9;
+  --aiw-user-bubble: #10b981;
+  --aiw-radius: 18px;
+
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2147483000;
+  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+  color: var(--aiw-ink);
+}
+
+.aiw-root *,
+.aiw-root *::before,
+.aiw-root *::after {
+  box-sizing: border-box;
+}
+
+/* ---------- Кнопка-лаунчер ---------- */
+.aiw-launcher {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  margin-left: auto;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--aiw-brand), var(--aiw-brand-dark));
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.45);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.aiw-launcher:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 16px 36px rgba(16, 185, 129, 0.55);
+}
+
+.aiw-launcher:active {
+  transform: scale(0.96);
+}
+
+.aiw-launcher svg {
+  width: 28px;
+  height: 28px;
+}
+
+.aiw-launcher .aiw-launcher-close {
+  display: none;
+}
+
+.aiw-root[data-open='true'] .aiw-launcher .aiw-launcher-open {
+  display: none;
+}
+
+.aiw-root[data-open='true'] .aiw-launcher .aiw-launcher-close {
+  display: block;
+}
+
+.aiw-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+  box-shadow: 0 0 0 3px #fff;
+}
+
+.aiw-badge[hidden] {
+  display: none;
+}
+
+.aiw-ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.45);
+  animation: aiw-ping 2s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes aiw-ping {
+  0% { transform: scale(1); opacity: 0.6; }
+  70% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* ---------- Окно чата ---------- */
+.aiw-window {
+  position: absolute;
+  right: 0;
+  bottom: 78px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 620px;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  background: var(--aiw-bg);
+  border-radius: var(--aiw-radius);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+  transform-origin: bottom right;
+  transform: translateY(16px) scale(0.96);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+}
+
+.aiw-root[data-open='true'] .aiw-window {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.aiw-root[data-collapsed='true'] .aiw-window {
+  height: auto;
+}
+
+.aiw-root[data-collapsed='true'] .aiw-body,
+.aiw-root[data-collapsed='true'] .aiw-quick,
+.aiw-root[data-collapsed='true'] .aiw-composer {
+  display: none;
+}
+
+/* ---------- Шапка ---------- */
+.aiw-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--aiw-brand), var(--aiw-brand-dark));
+  color: #fff;
+}
+
+.aiw-agent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.aiw-avatar {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+}
+
+.aiw-avatar .aiw-presence {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #fff;
+}
+
+.aiw-agent-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.aiw-agent-name {
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aiw-agent-role {
+  font-size: 12px;
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aiw-header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.aiw-icon-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease;
+}
+
+.aiw-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.aiw-icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.aiw-icon-btn[aria-pressed='false'] {
+  opacity: 0.55;
+}
+
+/* ---------- Лента сообщений ---------- */
+.aiw-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 14px 6px;
+  background: var(--aiw-bg);
+  scroll-behavior: smooth;
+}
+
+.aiw-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.aiw-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+
+.aiw-divider {
+  text-align: center;
+  margin: 6px 0 14px;
+}
+
+.aiw-divider span {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--aiw-bg-soft);
+  color: var(--aiw-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.aiw-msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+  animation: aiw-in 0.24s ease;
+}
+
+@keyframes aiw-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.aiw-msg--user {
+  flex-direction: row-reverse;
+}
+
+.aiw-msg-avatar {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.aiw-msg--agent .aiw-msg-avatar {
+  background: linear-gradient(135deg, var(--aiw-brand), var(--aiw-brand-dark));
+}
+
+.aiw-msg--user .aiw-msg-avatar {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+
+.aiw-bubble-wrap {
+  max-width: 78%;
+  display: flex;
+  flex-direction: column;
+}
+
+.aiw-msg--user .aiw-bubble-wrap {
+  align-items: flex-end;
+}
+
+.aiw-bubble {
+  padding: 10px 13px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.aiw-msg--agent .aiw-bubble {
+  background: var(--aiw-agent-bubble);
+  border-bottom-left-radius: 4px;
+}
+
+.aiw-msg--user .aiw-bubble {
+  background: var(--aiw-user-bubble);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.aiw-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--aiw-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.aiw-msg--user .aiw-meta {
+  flex-direction: row-reverse;
+}
+
+.aiw-ticks {
+  letter-spacing: -3px;
+  font-size: 12px;
+  color: var(--aiw-muted);
+}
+
+.aiw-ticks[data-status='read'] {
+  color: var(--aiw-brand);
+}
+
+/* Вложение в сообщении */
+.aiw-attach {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.06);
+  font-size: 12px;
+}
+
+.aiw-msg--user .aiw-attach {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.aiw-attach-icon {
+  font-size: 18px;
+}
+
+.aiw-attach-name {
+  font-weight: 600;
+}
+
+.aiw-attach-size {
+  color: var(--aiw-muted);
+  font-size: 11px;
+}
+
+.aiw-msg--user .aiw-attach-size {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Индикатор набора текста */
+.aiw-typing-bubble {
+  display: inline-flex;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--aiw-agent-bubble);
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+}
+
+.aiw-typing-bubble span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #94a3b8;
+  animation: aiw-typing 1.2s infinite ease-in-out;
+}
+
+.aiw-typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+.aiw-typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes aiw-typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ---------- Быстрые ответы ---------- */
+.aiw-quick {
+  display: flex;
+  gap: 8px;
+  padding: 4px 14px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.aiw-quick::-webkit-scrollbar {
+  display: none;
+}
+
+.aiw-quick:empty {
+  display: none;
+}
+
+.aiw-chip {
+  flex: none;
+  padding: 8px 13px;
+  border: 1px solid var(--aiw-brand);
+  border-radius: 999px;
+  background: var(--aiw-brand-soft);
+  color: var(--aiw-brand-dark);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.aiw-chip:hover {
+  background: var(--aiw-brand);
+  color: #fff;
+}
+
+/* ---------- Поле ввода ---------- */
+.aiw-composer {
+  position: relative;
+  border-top: 1px solid var(--aiw-line);
+  padding: 10px 12px;
+  background: var(--aiw-bg);
+}
+
+.aiw-composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.aiw-textarea {
+  flex: 1;
+  min-height: 40px;
+  max-height: 120px;
+  padding: 10px 12px;
+  border: 1px solid var(--aiw-line);
+  border-radius: 12px;
+  background: var(--aiw-bg-soft);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: none;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.aiw-textarea:focus {
+  border-color: var(--aiw-brand);
+  background: #fff;
+}
+
+.aiw-send {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--aiw-brand), var(--aiw-brand-dark));
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.aiw-send:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.aiw-send:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.aiw-send svg {
+  width: 20px;
+  height: 20px;
+}
+
+.aiw-tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.aiw-tool {
+  width: 38px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease;
+}
+
+.aiw-tool:hover {
+  background: var(--aiw-bg-soft);
+}
+
+.aiw-powered {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--aiw-muted);
+}
+
+.aiw-powered strong {
+  color: var(--aiw-brand-dark);
+}
+
+/* Панель эмодзи */
+.aiw-emoji-panel {
+  position: absolute;
+  left: 12px;
+  bottom: 62px;
+  width: 260px;
+  max-width: calc(100% - 24px);
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  background: #fff;
+  border: 1px solid var(--aiw-line);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+}
+
+.aiw-emoji-panel[hidden] {
+  display: none;
+}
+
+.aiw-emoji-btn {
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 18px;
+  padding: 4px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.aiw-emoji-btn:hover {
+  background: var(--aiw-bg-soft);
+}
+
+/* ---------- Мобильная раскладка ---------- */
+@media (max-width: 520px) {
+  .aiw-root {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .aiw-window {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .aiw-root[data-open='true'] .aiw-launcher {
+    display: none;
+  }
+}
