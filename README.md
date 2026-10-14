@@ -29,6 +29,27 @@ npm run check:gemini
 
 Без ключа всё тоже работает — просто на мок-ответах.
 
+## Деплой на Vercel
+
+Проект готов к Vercel: статика (`index.html`, `styles/`, `src/`) отдаётся как есть,
+а backend выполняется как serverless-функции в `api/`.
+
+```bash
+npm i -g vercel     # если CLI ещё не установлен
+vercel login        # или: vercel deploy --token <TOKEN>
+vercel deploy --prod
+```
+
+Что нужно настроить в проекте Vercel:
+
+- **Environment Variables** → `GEMINI_API_KEY` (и при желании `GEMINI_MODEL`,
+  `GEMINI_TRANSPORT`, `GEMINI_TIMEOUT_MS`). Без ключа функции отдают мок-ответы.
+- Файл `.env` в деплой не попадает (см. `.vercelignore`) — ключ задаётся только
+  в настройках проекта.
+- `api/chat.js` (`POST /api/chat`) и `api/health.js` (`GET /api/health`) повторяют
+  контракт локального `server/index.js`, поэтому фронтенд работает без изменений.
+- Функции stateless: история диалога приходит от клиента полем `history`.
+
 ## Структура
 
 ```
@@ -44,6 +65,10 @@ src/mock/mockCurrency.js   мок-курсы валют (RUB / UZS / USD)
 server/index.js            Express: статика, POST /api/chat, GET /api/health
 server/gemini.js           вызовы Gemini API (2 транспорта), разбор ответа
 server/prompt.js           системная инструкция агента + JSON-схема ответа
+api/chat.js                Vercel-функция POST /api/chat (тот же контракт)
+api/health.js              Vercel-функция GET /api/health
+vercel.json                настройки Vercel (таймауты функций)
+.vercelignore              что не выкладывать в деплой (в т.ч. .env)
 scripts/check-gemini.js    диагностика подключения к Gemini
 scripts/test-parse-reply.js проверки разбора ответов модели
 scripts/test-currency.js   проверки цен в рублях, сумах и долларах

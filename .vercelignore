@@ -1,0 +1,11 @@
+# Не выкладываем на Vercel секреты и лишние файлы.
+# .env содержит GEMINI_API_KEY — он задаётся в настройках проекта Vercel,
+# а не файлом в деплое.
+.env
+.env.local
+.env.*.local
+
+.git
+node_modules
+scripts
+*.log
