@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ТехноМаркет — демо чата ИИ-агента</title>
+  <title>АвтоПлюс — автозапчасти и демо чата ИИ-агента</title>
   <link rel="stylesheet" href="styles/demo.css" />
   <link rel="stylesheet" href="styles/chat-widget.css" />
 </head>
@@ -11,12 +11,12 @@
   <header class="site-header" id="top">
     <div class="container header-inner">
       <a class="logo" href="#top">
-        <span class="logo-mark">TM</span>
-        <span class="logo-text">Техно<b>Маркет</b></span>
+        <span class="logo-mark">АП</span>
+        <span class="logo-text">Авто<b>Плюс</b></span>
       </a>
       <nav class="site-nav" id="site-nav"></nav>
       <div class="header-actions">
-        <span class="header-phone">8 800 555-35-35</span>
+        <a class="header-phone" id="header-phone" href="tel:+78007002424">8 800 700-24-24</a>
         <button class="btn btn-primary" id="open-chat-top" type="button">Чат с ИИ</button>
       </div>
     </div>
@@ -25,11 +25,12 @@
   <main>
     <section class="hero container">
       <div class="hero-text">
-        <span class="pill">ИИ-ассистент отвечает за 45 секунд</span>
-        <h1>Магазин техники, где поддержка всегда на связи</h1>
+        <span class="pill">ИИ-ассистент подберёт запчасть за 45 секунд</span>
+        <h1>Автозапчасти, которые точно подойдут вашему авто</h1>
         <p class="hero-lead">
-          Оформите заказ, отследите доставку или оформите возврат прямо в чате.
-          Нейра — наш ИИ-ассистент — помогает круглосуточно и подключает живого оператора, если нужно.
+          Подберите деталь по VIN или марке, модели и году, проверьте наличие и цену прямо в чате.
+          Макс — наш ИИ-ассистент — поможет с запчастями и расходниками, а по любым другим вопросам
+          подскажет телефон автомастерской.
         </p>
         <div class="hero-actions">
           <button class="btn btn-primary btn-lg" id="open-chat-hero" type="button">Открыть чат</button>
@@ -37,22 +38,22 @@
         </div>
         <ul class="hero-points">
           <li>✅ Демо-виджет в правом нижнем углу</li>
-          <li>✅ Мок-данные и мок-ответы ассистента</li>
-          <li>✅ Без сборки — чистый HTML/CSS/JS</li>
+          <li>✅ Ассистент отвечает только по товарам для авто</li>
+          <li>✅ На остальные вопросы — номер автомастерской</li>
         </ul>
       </div>
       <div class="hero-card" aria-hidden="true">
         <div class="hero-chat-preview">
           <div class="hcp-header">
-            <span class="hcp-avatar">Н</span>
+            <span class="hcp-avatar">М</span>
             <div>
-              <strong>Нейра · ИИ-ассистент</strong>
+              <strong>Макс · ИИ-ассистент</strong>
               <span>Онлайн</span>
             </div>
           </div>
-          <div class="hcp-msg hcp-msg--agent">Здравствуйте! Чем помочь? 👋</div>
-          <div class="hcp-msg hcp-msg--user">Где мой заказ №482913?</div>
-          <div class="hcp-msg hcp-msg--agent">Он уже у курьера — приедет сегодня до 19:00 🚚</div>
+          <div class="hcp-msg hcp-msg--agent">Здравствуйте! Чем помочь? 🚗</div>
+          <div class="hcp-msg hcp-msg--user">Колодки на Camry 2019 есть?</div>
+          <div class="hcp-msg hcp-msg--agent">Да, в наличии оригинал и аналоги от 3 490 ₽ 🔧</div>
           <div class="hcp-typing"><i></i><i></i><i></i></div>
         </div>
       </div>
@@ -64,8 +65,12 @@
 
     <section class="catalog container" id="catalog">
       <div class="section-head">
-        <h2>Хиты каталога</h2>
-        <p>Спросите ассистента про любой товар — он подскажет цену и наличие.</p>
+        <h2>Популярные запчасти</h2>
+        <p>Спросите ассистента про любую деталь — он подскажет цену и наличие под ваш автомобиль.</p>
+      </div>
+      <div class="catalog-toolbar">
+        <div class="currency-switch" id="currency-switch" role="group" aria-label="Валюта цен"></div>
+        <p class="rates-note" id="rates-note"></p>
       </div>
       <div class="product-grid" id="product-grid"></div>
     </section>
@@ -73,13 +78,14 @@
     <section class="support container" id="support">
       <div class="support-inner">
         <div>
-          <h2>Поддержка, которая не заставляет ждать</h2>
+          <h2>Запчасти и установка в одном месте</h2>
           <p>
-            ИИ-ассистент мгновенно отвечает на типовые вопросы: доставка, возврат, оплата, гарантия.
-            Сложные случаи он передаёт живому оператору вместе с историей диалога.
+            ИИ-ассистент мгновенно подберёт деталь по VIN, проверит наличие и покажет аналоги.
+            Монтаж и замену выполняет автомастерская «АвтоПлюс Сервис» — запись по телефону
+            <strong id="support-phone">8 800 700-24-24</strong>.
           </p>
         </div>
-        <button class="btn btn-primary btn-lg" id="open-chat-support" type="button">Задать вопрос ассистенту</button>
+        <button class="btn btn-primary btn-lg" id="open-chat-support" type="button">Подобрать запчасть</button>
       </div>
     </section>
   </main>
@@ -87,14 +93,17 @@
   <footer class="site-footer" id="footer">
     <div class="container footer-inner">
       <div>
-        <strong>ТехноМаркет</strong> — демонстрационный проект чата ИИ-агента.
+        <strong>АвтоПлюс</strong> — демонстрационный проект чата ИИ-агента по автозапчастям.
       </div>
       <div class="footer-note">Мок-данные находятся в <code>src/mock/mockChat.js</code></div>
     </div>
   </footer>
 
-  <!-- Порядок подключения: сначала мок-данные, затем виджет, затем инициализация. -->
+  <!-- Порядок подключения: мок-данные (валюты → чат), клиент API, виджет, инициализация. -->
+  <script src="src/mock/mockCurrency.js"></script>
+  <script src="src/currency.js"></script>
   <script src="src/mock/mockChat.js"></script>
+  <script src="src/api.js"></script>
   <script src="src/chatWidget.js"></script>
   <script src="src/app.js"></script>
 </body>

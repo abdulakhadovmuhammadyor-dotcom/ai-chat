@@ -7,8 +7,11 @@
  * Публичный API: window.AIChatWidget.init(options) -> instance
  *   instance.open() / close() / toggle() / send(text)
  *
- * Логика ответов — мок-имитация ИИ (подбор по ключевым словам из базы знаний).
- * TODO: заменить на реальные данные / ответы реального API чата.
+ * Логика ответов: если задан options.apiUrl и подключён src/api.js, вопрос уходит
+ * на backend (POST /api/chat → Gemini, см. server/). Если backend недоступен или
+ * отвечает ошибкой, виджет отвечает мок-логикой по ключевым словам из базы знаний —
+ * чат остаётся рабочим в любом случае.
+ * TODO: заменить мок-ответы на реальные данные / ответы реального API чата.
  */
 (function (global) {
   'use strict';
@@ -72,12 +75,25 @@
       emojis: opts.emojis || [],
       validate: opts.validate,
       brand: opts.brand || 'Neyra',
+      apiUrl: opts.apiUrl === undefined ? '' : opts.apiUrl,
+      apiTimeout: opts.apiTimeout || 25000,
+      // Валюта, в которой пользователь смотрит цены: ассистент отвечает в ней же.
+      currency: opts.currency || '',
       autoOpen: !!opts.autoOpen,
       autoOpenDelay: opts.autoOpenDelay || 12000,
     };
 
     this.mount();
     this.bind();
+
+    // Backend-канал к Gemini. Нет скрипта api.js — работаем только на моках.
+    this.api = null;
+    if (this.options.apiUrl && global.ChatApi) {
+      this.api = global.ChatApi.create({
+        url: this.options.apiUrl,
+        timeout: this.options.apiTimeout,
+      });
+    }
 
     // Автооткрытие по таймеру (как «приглашение» в Jivo).
     if (this.options.autoOpen) {
@@ -131,7 +147,7 @@
       '<textarea class="aiw-textarea" data-role="input" rows="1" placeholder="Напишите сообщение…" aria-label="Сообщение"></textarea>' +
       '<button class="aiw-send" type="button" data-action="send" disabled aria-label="Отправить">' + ICONS.send + '</button>' +
       '</div>' +
-      '<div class="aiw-powered">Работает на <strong>' + this.options.brand + '</strong> · ИИ-ассистент</div>' +
+      '<div class="aiw-powered" data-role="powered">Работает на <strong>' + this.options.brand + '</strong> · ИИ-ассистент</div>' +
       '<div class="aiw-emoji-panel" data-role="emoji-panel" hidden></div>' +
       '<input type="file" data-role="file" hidden />' +
       '</footer>' +
@@ -152,6 +168,7 @@
       agentInitials: root.querySelector('[data-role="agent-initials"]'),
       agentName: root.querySelector('[data-role="agent-name"]'),
       agentRole: root.querySelector('[data-role="agent-role"]'),
+      powered: root.querySelector('[data-role="powered"]'),
     };
 
     this.el.agentInitials.textContent = this.options.agent.initials || initialsOf(this.options.agent.name);
@@ -476,9 +493,13 @@
     }, 1400);
   };
 
-  // ---------- Мок-логика ответа ассистента ----------
+  // ---------- Логика ответа ассистента: Gemini → мок-fallback ----------
 
   AIChatWidget.prototype.matchIntent = function (text) {
+    // Общий матчер из мок-модуля — один источник правил для клиента и сервера.
+    if (global.ChatMocks && typeof global.ChatMocks.matchIntent === 'function') {
+      return global.ChatMocks.matchIntent(text);
+    }
     var query = String(text).toLowerCase();
     var best = null;
     var bestScore = 0;
@@ -495,24 +516,136 @@
     return best || this.options.fallback;
   };
 
+  /** Локальный мок-ответ — используется, когда backend недоступен. */
+  AIChatWidget.prototype.localReply = function (text) {
+    if (global.ChatMocks && typeof global.ChatMocks.mockReply === 'function') {
+      var result = global.ChatMocks.mockReply(text);
+      return { text: result.reply, quickReplies: result.quickReplies, source: 'mock' };
+    }
+    var intent = this.matchIntent(text);
+    return { text: intent.answer, quickReplies: intent.quickReplies || [], source: 'mock' };
+  };
+
+  /** История диалога для backend (без текущего вопроса — он уходит отдельно). */
+  AIChatWidget.prototype.historyForApi = function () {
+    var items = [];
+    this.messages.forEach(function (msg) {
+      if (!msg || !msg.text) return;
+      items.push({ author: msg.author === 'user' ? 'user' : 'agent', text: msg.text });
+    });
+    while (items.length && items[items.length - 1].author === 'user') items.pop();
+    return items;
+  };
+
+  /** Показать готовый ответ: сообщение, чипы, счётчик, звук. */
+  AIChatWidget.prototype.deliver = function (payload) {
+    this.hideTyping();
+
+    var reply = {
+      id: uid('agent'),
+      author: 'agent',
+      text: payload.text || '',
+      time: nowTime(),
+      source: payload.source || 'mock',
+    };
+    var el = this.appendMessage(reply);
+
+    // Помечаем источник ответа: видно, отвечает Gemini или мок-логика.
+    if (el) {
+      el.setAttribute('data-source', reply.source);
+      var bubble = el.querySelector('.aiw-bubble');
+      if (bubble) {
+        bubble.title = reply.source === 'gemini'
+          ? 'Ответ сгенерирован Gemini'
+          : 'Мок-ответ: Gemini недоступен';
+      }
+    }
+
+    this.messages.push(reply);
+    this.setQuickReplies(payload.quickReplies || []);
+    if (!this.state.open) this.bumpUnread();
+    if (this.state.sound) this.beep();
+  };
+
+  /**
+   * Ответ на вопрос пользователя.
+   *
+   * 1) Есть backend → спрашиваем /api/chat (Gemini как «мозги»).
+   * 2) Backend выключен или ответил ошибкой → отвечаем мок-логикой.
+   * В обоих случаях сначала показываем «печатает…».
+   */
   AIChatWidget.prototype.replyTo = function (text) {
     var self = this;
-    var intent = this.matchIntent(text);
-    var answer = intent.answer;
+    var minDelay = new Promise(function (resolve) {
+      setTimeout(resolve, 450);
+    });
 
     this.showTyping();
-    // Пауза зависит от длины ответа — имитация «раздумий» ИИ.
-    var delay = Math.min(2200, 600 + answer.length * 12);
 
-    setTimeout(function () {
-      self.hideTyping();
-      var reply = { id: uid('agent'), author: 'agent', text: answer, time: nowTime() };
-      self.appendMessage(reply);
-      self.messages.push(reply);
-      self.setQuickReplies(intent.quickReplies || []);
-      if (!self.state.open) self.bumpUnread();
-      if (self.state.sound) self.beep();
-    }, delay);
+    if (!this.api) {
+      // Backend отключён: имитируем «раздумья» ИИ и отвечаем мок-данными.
+      var mock = this.localReply(text);
+      var delay = Math.min(2200, 500 + String(mock.text).length * 10);
+      setTimeout(function () {
+        self.deliver(mock);
+      }, delay);
+      return;
+    }
+
+    this.api
+      .ask(text, this.historyForApi(), this.options.currency)
+      .then(function (answer) {
+        var fallback = self.localReply(text);
+        return minDelay.then(function () {
+          self.deliver({
+            text: answer.reply || fallback.text,
+            quickReplies: (answer.quickReplies && answer.quickReplies.length) ? answer.quickReplies : fallback.quickReplies,
+            source: answer.source === 'gemini' ? 'gemini' : 'mock',
+          });
+        });
+      })
+      .catch(function (err) {
+        // Backend недоступен — чат продолжает работать на мок-данных.
+        if (global.console) global.console.warn('[ai-chat] backend недоступен, мок-ответ:', err && err.message);
+        return minDelay.then(function () {
+          self.deliver(self.localReply(text));
+        });
+      });
+  };
+
+  /** Подпись движка под полем ввода (например, «Gemini» или «мок-ответы»). */
+  AIChatWidget.prototype.setEngine = function (html) {
+    if (!this.el || !this.el.powered || !html) return;
+    this.el.powered.innerHTML = html;
+  };
+
+  /**
+   * Сменить валюту цен, в которой ассистент отвечает про стоимость.
+   * Вызывается со страницы при переключении валюты на витрине.
+   */
+  AIChatWidget.prototype.setCurrency = function (code) {
+    this.options.currency = String(code || '').toUpperCase();
+    return this.options.currency;
+  };
+
+  /** Состояние backend: включён ли Gemini. */
+  AIChatWidget.prototype.checkBackend = function () {
+    var self = this;
+    if (!this.api || typeof this.api.health !== 'function') return Promise.resolve(null);
+    return this.api
+      .health()
+      .then(function (state) {
+        if (state && state.gemini) {
+          self.setEngine('Работает на <strong>Gemini</strong> · ' + (state.model || 'модель') + '');
+        } else {
+          self.setEngine('Работает на <strong>мок-данных</strong> · Gemini отключён');
+        }
+        return state;
+      })
+      .catch(function () {
+        self.setEngine('Backend недоступен · <strong>мок-ответы</strong>');
+        return null;
+      });
   };
 
   AIChatWidget.prototype.beep = function () {

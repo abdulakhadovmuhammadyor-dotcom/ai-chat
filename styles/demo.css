@@ -362,6 +362,62 @@ body {
   color: var(--muted);
 }
 
+/* ---------- Переключатель валют ---------- */
+.catalog-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.currency-switch {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+}
+
+.currency-btn {
+  min-width: 52px;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.currency-btn:hover {
+  color: var(--ink);
+}
+
+.currency-btn.is-active {
+  background: var(--brand);
+  color: #fff;
+}
+
+.currency-btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.rates-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.rates-source {
+  opacity: 0.75;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -434,6 +490,13 @@ body {
   font-size: 14px;
   color: var(--muted);
   text-decoration: line-through;
+}
+
+/* Подсказка «в базовой валюте», когда выбраны сумы или доллары. */
+.price-base {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .product-rating {
@@ -547,6 +610,11 @@ body {
 @media (max-width: 560px) {
   .header-actions .btn {
     display: none;
+  }
+
+  .catalog-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .product-grid {

@@ -1,0 +1,21 @@
+{
+  "name": "ai-chat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Чат ИИ-агента «Нейра»: виджет в стиле Jivo, демо-страница магазина и backend-обёртка над Gemini API",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "check:gemini": "node scripts/check-gemini.js",
+    "test:parser": "node scripts/test-parse-reply.js",
+    "test:currency": "node scripts/test-currency.js",
+    "test:agent": "node scripts/test-agent-scope.js"
+  },
+  "dependencies": {
+    "express": "^5.0.0"
+  }
+}

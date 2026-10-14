@@ -1,6 +1,10 @@
 # Зависимости
 node_modules/
 
+# Переменные окружения (ключ Gemini API — не коммитим)
+.env
+.env.local
+
 # Логи
 *.log
 npm-debug.log*
